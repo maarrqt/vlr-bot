@@ -36,19 +36,16 @@ app.get("/next-match", async (req, res) => {
     const dateMatch = rawDate.match(/\d{4}\/\d{2}\/\d{2}/);
 
     let formattedDate = "";
-    let year, month, day;
 
     if (dateMatch) {
-      [year, month, day] = dateMatch[0].split("/");
+      const [year, month, day] = dateMatch[0].split("/");
       formattedDate = `${day}/${month}`;
     }
 
-    // hora real
-    const rightSide = match.find(".m-item-date").parent();
+    // 🔥 hora (FIX DEFINITIVO)
+    const rawText = match.text();
 
-    let hourMatch = rightSide
-      .text()
-      .match(/\d{1,2}:\d{2}\s?(am|pm)/i);
+    let hourMatch = rawText.match(/\b\d{1,2}:\d{2}\s?(am|pm)\b/i);
 
     let rawHour = hourMatch ? hourMatch[0] : "";
 
@@ -62,7 +59,7 @@ app.get("/next-match", async (req, res) => {
       if (modifier.toLowerCase() === "pm" && hours !== 12) hours += 12;
       if (modifier.toLowerCase() === "am" && hours === 12) hours = 0;
 
-      // 🔥 FIX FINAL (Argentina base, Chile -1)
+      // 🇦🇷 base, 🇨🇱 -1
       const argentinaHour = hours;
       const chileHour = (hours - 1 + 24) % 24;
 
@@ -76,7 +73,7 @@ app.get("/next-match", async (req, res) => {
       );
     }
 
-    // fallback si no hay hora exacta
+    // fallback
     const rawTime = match.find(".m-item-time").text().trim();
 
     return res.send(
