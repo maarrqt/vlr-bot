@@ -66,7 +66,7 @@ app.get("/next-match", async (req, res) => {
       }
 
       // 🔥 ACÁ ESTÁ EL FIX IMPORTANTE (NO UTC)
-      const baseDate = new Date(year, month - 1, day, hours, minutes);
+      const baseDate = new Date(`${year}-${month}-${day}T${hours.toString().padStart(2, "0")}:${minutes}:00`);
 
       const chile = baseDate.toLocaleTimeString("es-CL", {
         hour: "2-digit",
