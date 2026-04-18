@@ -23,26 +23,29 @@ app.get("/next-match", async (req, res) => {
     let team1 = match.find(".m-item-team-name").first().text().trim();
     let team2 = match.find(".m-item-team-name").last().text().trim();
 
+    // asegurar 9z primero
     if (team2.toLowerCase().includes("9z")) {
       [team1, team2] = [team2, team1];
     }
 
+    // si rival no existe → TBD
     if (team1 === team2 || !team2 || team2 === "-") {
       team2 = "TBD";
     }
 
-    // 🔥 COUNTDOWN (esto es lo importante)
+    // 🔥 COUNTDOWN (lo importante)
     let countdown = match.find(".m-item-time").text().trim();
 
-    // fallback por si cambia el selector
+    // fallback por si cambia VLR
     if (!countdown) {
       const text = match.text();
       const matchCountdown = text.match(/\d+d\s*\d+h/i);
       countdown = matchCountdown ? matchCountdown[0] : "pronto";
     }
 
+    // 🔥 FORMATO FINAL
     return res.send(
-      `🔥 ${team1} vs ${team2} 🕒 en ${countdown}`
+      `${team1} vs ${team2} — ${countdown} 🕒`
     );
 
   } catch (err) {
