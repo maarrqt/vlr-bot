@@ -31,53 +31,18 @@ app.get("/next-match", async (req, res) => {
       team2 = "TBD";
     }
 
-    // fecha
-    let rawDate = match.find(".m-item-date").text().trim();
-    const dateMatch = rawDate.match(/\d{4}\/\d{2}\/\d{2}/);
+    // 🔥 COUNTDOWN (esto es lo importante)
+    let countdown = match.find(".m-item-time").text().trim();
 
-    let formattedDate = "";
-
-    if (dateMatch) {
-      const [year, month, day] = dateMatch[0].split("/");
-      formattedDate = `${day}/${month}`;
+    // fallback por si cambia el selector
+    if (!countdown) {
+      const text = match.text();
+      const matchCountdown = text.match(/\d+d\s*\d+h/i);
+      countdown = matchCountdown ? matchCountdown[0] : "pronto";
     }
-
-    // 🔥 hora (FIX DEFINITIVO)
-    const rawText = match.text();
-
-    let hourMatch = rawText.match(/\b\d{1,2}:\d{2}\s?(am|pm)\b/i);
-
-    let rawHour = hourMatch ? hourMatch[0] : "";
-
-    if (rawHour) {
-      let [time, modifier] = rawHour.split(" ");
-      let [hours, minutes] = time.split(":");
-
-      hours = parseInt(hours);
-
-      // convertir a 24h
-      if (modifier.toLowerCase() === "pm" && hours !== 12) hours += 12;
-      if (modifier.toLowerCase() === "am" && hours === 12) hours = 0;
-
-      // 🇦🇷 base, 🇨🇱 -1
-      const argentinaHour = hours;
-      const chileHour = (hours - 1 + 24) % 24;
-
-      const format = (h) =>
-        h.toString().padStart(2, "0") + ":" + minutes;
-
-      return res.send(
-        `🔥 ${team1} vs ${team2} 🕒 ${formattedDate} at ${format(
-          chileHour
-        )} 🇨🇱 - ${format(argentinaHour)} 🇦🇷 🇧🇷`
-      );
-    }
-
-    // fallback
-    const rawTime = match.find(".m-item-time").text().trim();
 
     return res.send(
-      `🔥 ${team1} vs ${team2} 🕒 ${formattedDate} (${rawTime}) 🇦🇷 🇧🇷`
+      `🔥 ${team1} vs ${team2} 🕒 en ${countdown}`
     );
 
   } catch (err) {
