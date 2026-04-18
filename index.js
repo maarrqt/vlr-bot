@@ -62,9 +62,9 @@ app.get("/next-match", async (req, res) => {
       if (modifier.toLowerCase() === "pm" && hours !== 12) hours += 12;
       if (modifier.toLowerCase() === "am" && hours === 12) hours = 0;
 
-      // 🔥 FIX REAL (manual timezone)
-      const chileHour = (hours - 4 + 24) % 24;
-      const argentinaHour = (hours - 3 + 24) % 24;
+      // 🔥 FIX FINAL (Argentina base, Chile -1)
+      const argentinaHour = hours;
+      const chileHour = (hours - 1 + 24) % 24;
 
       const format = (h) =>
         h.toString().padStart(2, "0") + ":" + minutes;
@@ -76,7 +76,7 @@ app.get("/next-match", async (req, res) => {
       );
     }
 
-    // fallback
+    // fallback si no hay hora exacta
     const rawTime = match.find(".m-item-time").text().trim();
 
     return res.send(
