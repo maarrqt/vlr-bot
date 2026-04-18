@@ -19,7 +19,7 @@ app.get("/next-match", async (req, res) => {
       return res.send("No hay próximos partidos 😴");
     }
 
-    // EQUIPOS
+    // equipos
     let team1 = match.find(".m-item-team-name").first().text().trim();
     let team2 = match.find(".m-item-team-name").last().text().trim();
 
@@ -31,7 +31,7 @@ app.get("/next-match", async (req, res) => {
       team2 = "TBD";
     }
 
-    // FECHA
+    // fecha
     let rawDate = match.find(".m-item-date").text().trim();
     const dateMatch = rawDate.match(/\d{4}\/\d{2}\/\d{2}/);
 
@@ -43,7 +43,7 @@ app.get("/next-match", async (req, res) => {
       formattedDate = `${day}/${month}`;
     }
 
-    // HORA REAL (lado derecho)
+    // hora real
     const rightSide = match.find(".m-item-date").parent();
 
     let hourMatch = rightSide
@@ -52,42 +52,31 @@ app.get("/next-match", async (req, res) => {
 
     let rawHour = hourMatch ? hourMatch[0] : "";
 
-    if (rawHour && year) {
+    if (rawHour) {
       let [time, modifier] = rawHour.split(" ");
       let [hours, minutes] = time.split(":");
 
       hours = parseInt(hours);
 
-      if (modifier.toLowerCase() === "pm" && hours !== 12) {
-        hours += 12;
-      }
-      if (modifier.toLowerCase() === "am" && hours === 12) {
-        hours = 0;
-      }
+      // convertir a 24h
+      if (modifier.toLowerCase() === "pm" && hours !== 12) hours += 12;
+      if (modifier.toLowerCase() === "am" && hours === 12) hours = 0;
 
-      // 🔥 ACÁ ESTÁ EL FIX IMPORTANTE (NO UTC)
-      const baseDate = new Date(`${year}-${month}-${day}T${hours.toString().padStart(2, "0")}:${minutes}:00`);
+      // 🔥 FIX REAL (manual timezone)
+      const chileHour = (hours - 4 + 24) % 24;
+      const argentinaHour = (hours - 3 + 24) % 24;
 
-      const chile = baseDate.toLocaleTimeString("es-CL", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-        timeZone: "America/Santiago",
-      });
-
-      const argentina = baseDate.toLocaleTimeString("es-AR", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-        timeZone: "America/Argentina/Buenos_Aires",
-      });
+      const format = (h) =>
+        h.toString().padStart(2, "0") + ":" + minutes;
 
       return res.send(
-        `🔥 ${team1} vs ${team2} 🕒 ${formattedDate} at ${chile} 🇨🇱 - ${argentina} 🇦🇷 🇧🇷`
+        `🔥 ${team1} vs ${team2} 🕒 ${formattedDate} at ${format(
+          chileHour
+        )} 🇨🇱 - ${format(argentinaHour)} 🇦🇷 🇧🇷`
       );
     }
 
-    // FALLBACK (si no hay hora exacta)
+    // fallback
     const rawTime = match.find(".m-item-time").text().trim();
 
     return res.send(
